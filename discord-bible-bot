@@ -1,0 +1,4 @@
+#!/bin/sh
+
+test -f .env && . .env
+DISCORD_API_TOKEN="$DISCORD_API_TOKEN" bundle exec ruby bin/discord-bible-bot.rb
