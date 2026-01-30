@@ -37,12 +37,14 @@ end
 
 def random_citation()
   book = $bible.books.sample
-  chapter = book.chapters.sample
+  chapter_index = Random.rand(0...book.chapters.length)
+  chapter = book.chapters[chapter_index]
   versicles = chapter.versicles
-  versicle = versicles.keys.sample
-  citation = versicles[versicle]
+  versicle_count = Random.rand(0..2) # versicle notation is [inclusive, inclusive]
+  versicle_start = Random.rand(0...versicles.keys.length)
+  versicle_end = versicle_start + versicle_count
 
-  "**#{chapter.title}:#{versicle}**\n“#{citation}”"
+  citation(book.name, chapter_index + 1, versicle_start, versicle_end)
 end
 
 bot.register_application_command(:books, 'Get a list of the books in the Bible')
