@@ -5,6 +5,12 @@ token = ENV["DISCORD_API_TOKEN"] || raise("Missing 'DISCORD_API_TOKEN' environme
 $bible = BibleGen::Bible.from_hash(JSON.load_file("assets/bible.json", symbolize_names: true))
 bot = Discordrb::Bot.new(token: token, intents: [:server_messages])
 
+# ----- Update profile picture (run once) -----
+# avatar = File.open('assets/bible.png')
+# bot.profile.avatar = avatar
+# avatar.close
+# ---------------------------------------------
+
 def books()
   $bible.books.map(&:name).join("\n")
 end
