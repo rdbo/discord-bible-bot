@@ -2,6 +2,6 @@
 
 source "https://rubygems.org"
 
-gem "biblegen", path: '../biblegen'
-# gem "biblegen", git: 'https://github.com/rdbo/biblegen'
+# gem "biblegen", path: '../biblegen'
+gem "biblegen", git: 'https://github.com/rdbo/biblegen'
 gem "discordrb"
