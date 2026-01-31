@@ -4,6 +4,9 @@ require 'discordrb'
 token = ENV["DISCORD_API_TOKEN"] || raise("Missing 'DISCORD_API_TOKEN' environment variable!")
 $bible = BibleGen::Bible.from_hash(JSON.load_file("assets/bible.json", symbolize_names: true))
 bot = Discordrb::Bot.new(token: token, intents: [:server_messages])
+channels = { "1234": "876530451039256647" }
+last_daily_update = nil
+daily_chapter_index = 0
 
 # ----- Update profile picture (run once) -----
 # avatar = File.open('assets/bible.png')
@@ -15,7 +18,7 @@ def books()
   $bible.books.map(&:name).join("\n")
 end
 
-def citation(book_name, chapter_num, versicle_start, versicle_end=nil)
+def citation(book_name, chapter_num, versicle_start, versicle_end=nil, decorate=true)
   raise "Invalid parameters" if
     not book_name or
     chapter_num < 1 or
@@ -35,10 +38,10 @@ def citation(book_name, chapter_num, versicle_start, versicle_end=nil)
     }
   end
 
-  raise "Book not found: #{book_name}" if not book
+  raise "Book not found: #{book_name}" unless book
 
   chapter = book.chapters[chapter_num - 1]
-  raise "Invalid chapter" if not chapter
+  raise "Invalid chapter" unless chapter
 
   versicle_keys = chapter.versicles.keys
   raise "Invalid versicle start" if versicle_start >= versicle_keys.length
@@ -49,10 +52,14 @@ def citation(book_name, chapter_num, versicle_start, versicle_end=nil)
   end
     
   versicle_keys = versicle_keys[(versicle_start - 1)..(versicle_end - 1)]
-  versicles = versicle_keys.map{|x| "#{x}: “#{chapter.versicles[x]}”"}
-  citation = """**#{chapter.title}:#{versicle_start}#{versicle_end != versicle_start ? "-#{versicle_end}" : ""}**
-#{versicles.join("\n")}
-  """
+  versicles = if decorate
+    versicle_keys.map{|x| "#{x}: “#{chapter.versicles[x]}”"}
+  else
+    versicle_keys.map{|x| "#{chapter.versicles[x]}"}
+  end
+
+  """**#{chapter.title}:#{versicle_start}#{versicle_end != versicle_start ? "-#{versicle_end}" : ""}**
+#{versicles.join("\n")}"""
 end
 
 def random_citation()
@@ -65,6 +72,10 @@ def random_citation()
   versicle_end = versicle_start + versicle_count
 
   citation(book.name, chapter_index + 1, versicle_start, versicle_end)
+end
+
+def update_daily_message_channel(server_id, channel=nil)
+  channels[server_id] = channel
 end
 
 def command_wrapper(&block)
@@ -101,5 +112,57 @@ bot.application_command(:random_citation, &command_wrapper do |event|
   citation = random_citation()
   event.respond(content: "#{citation}")
 end)
+
+bot.register_application_command(:daily_message_channel, 'Set/unset the daily message channel') do |cmd|
+  cmd.channel('channel', 'The channel that will receeive daily updates from this bot', required: false)
+end
+bot.application_command(:daily_message_channel, &command_wrapper do |event|
+  update_daily_message_channel(event.server_id, event.options['channel'])
+  event.respond(content: "Channel updated successfully!", ephemeral: true)
+end)
+
+daily_check_interval = 3600
+ordered_chapters = $bible.books.map do |book|
+  book.chapters.map.with_index do |chapter, index|
+    citation(book.name, index + 1, 1, chapter.versicles.length - 1, false)
+  end
+end.flatten
+# Break into messages of 2000 chars
+ordered_chapters = ordered_chapters.map do |s|
+  lines = s.split("\n")
+  blocks = [""]
+  for line in lines
+    last_block = blocks.last
+    line += "\n"
+    if last_block.length + line.length <= 2000
+      blocks[-1] = last_block + line
+    else
+      blocks.append(line)
+    end
+  end
+  blocks
+end
+puts ordered_chapters[0]
+_daily_message_thread = Thread.new do
+  loop do
+    begin
+      if not last_daily_update
+        for channel in channels.values
+          continue unless channel
+          for block in ordered_chapters[daily_chapter_index]
+            bot.send_message(channel, block)
+            sleep 1
+          end
+          sleep 10
+        end
+
+        daily_chapter_index += 1
+      end
+    rescue => e
+      puts "[ERROR] Daily message check failed: #{e}"
+    end
+    sleep daily_check_interval
+  end
+end
 
 bot.run
