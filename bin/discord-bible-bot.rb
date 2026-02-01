@@ -1,5 +1,6 @@
-require 'biblegen'
-require 'discordrb'
+#!/usr/bin/ruby
+ require 'biblegen'
+ require 'discordrb'
 
 token = ENV["DISCORD_API_TOKEN"] || raise("Missing 'DISCORD_API_TOKEN' environment variable!")
 $bible = BibleGen::Bible.from_hash(JSON.load_file("assets/bible.json", symbolize_names: true))
@@ -19,46 +20,15 @@ def books()
 end
 
 def citation(book_name, chapter_num, versicle_start, versicle_end=nil, decorate=true)
-  raise "Invalid parameters" if
-    not book_name or
-    chapter_num < 1 or
-    versicle_start < 1 or
-    (versicle_end and versicle_end < 1 || versicle_end < versicle_start)
+  cit = $bible.citation(book_name, chapter_num, versicle_start, versicle_end)
 
-  # Find exact book match
-  book_name.downcase! # All the searches use lowercase
-  book = $bible.books.find{|x| x.name.downcase == book_name}
-
-  # Find partial book match
-  if not book
-    book = $bible.books.find{ |x|
-      cur_name = x.name.downcase
-      cur_name.start_with?(book_name) ||
-        cur_name.gsub(/\s/, "").start_with?(book_name)
-    }
-  end
-
-  raise "Book not found: #{book_name}" unless book
-
-  chapter = book.chapters[chapter_num - 1]
-  raise "Invalid chapter" unless chapter
-
-  versicle_keys = chapter.versicles.keys
-  raise "Invalid versicle start" if versicle_start >= versicle_keys.length
-  if not versicle_end
-    versicle_end = versicle_start
-  else
-    versicle_end = [versicle_end, versicle_keys.length - 1].min
-  end
-    
-  versicle_keys = versicle_keys[(versicle_start - 1)..(versicle_end - 1)]
   versicles = if decorate
-    versicle_keys.map{|x| "#{x}: “#{chapter.versicles[x]}”"}
-  else
-    versicle_keys.map{|x| "#{chapter.versicles[x]}"}
-  end
+                cit.versicles.map{|k, v| "#{k}: “#{v}”"}
+              else
+                cit.versicles.map{|_k, v| v}
+              end
 
-  """**#{chapter.title}:#{versicle_start}#{versicle_end != versicle_start ? "-#{versicle_end}" : ""}**
+  """**#{cit.header}**
 #{versicles.join("\n")}"""
 end
 

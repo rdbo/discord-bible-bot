@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/rdbo/biblegen
-  revision: d3fee8e4b791513d8bef98c74ce91e8d52aea920
+  revision: 92f63c282269f40884b911aa1e4f5e34b3f6ab32
   specs:
     biblegen (1.1.0)
 
