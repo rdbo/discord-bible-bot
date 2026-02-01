@@ -12,7 +12,8 @@ module DiscordBible
       @context = Context.new(@bot, @bible)
 
       # Register commands
-      for command in commands
+      commands.each { |command|
+        puts "Registering command '/#{command.name}'..."
         @bot.register_application_command(command.name, command.description) do |cmd|
           command.setup(cmd, @context)
         end
@@ -23,20 +24,21 @@ module DiscordBible
           puts "[ERROR] Failed to execute command '#{command.name}': #{e}"
           event.respond(content: "Something bad happened :(", ephemeral: true)
         end
-      end
+      }
 
       # Periodic tasks
+      puts "Setting up perioding tasks thread..."
       @periodic_task_thread = Thread.new do
         loop do
           begin
-            for periodic_task in periodic_tasks
+            periodic_tasks.each { |periodic_task|
               now = Time.now
               if @last_time_check and (now - @last_time_check) < periodic_task.interval_secs
                 continue
               end
 
               periodic_task.execute(@context)
-            end
+            }
             @last_time_check = Time.now
           rescue => e
             puts "[ERROR] Time event check failed: #{e}"
@@ -44,13 +46,17 @@ module DiscordBible
           sleep @time_check_interval_secs
         end
       end
+
+      puts "Discord Bible Bot initialized successfully"
     end
 
     def run
+      puts "Discord Bible Bot running..."
       @bot.run
     end
 
     def stop
+      puts "Discord Bible Bot stopped"
       @periodic_task_thread.exit
       @bot.stop
     end

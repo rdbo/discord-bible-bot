@@ -21,8 +21,58 @@ module DiscordBible
       end
     end
 
+    class RandomCitationCommand < DiscordBible::Command
+      attr_reader :name, :description
+
+      def initialize
+        super
+        @name = :random_citation
+        @description = 'Get a random citation from the Bible'
+      end
+
+      def setup(_cmd, _context) end
+
+      def execute(event, context)
+        book = context.bible.books.sample
+        chapter_index = Random.rand(0...book.chapters.length)
+        chapter = book.chapters[chapter_index]
+        versicles = chapter.versicles
+        versicle_count = Random.rand(0..2) # versicle notation is [inclusive, inclusive]
+        versicle_start = Random.rand(0...versicles.keys.length)
+        versicle_end = versicle_start + versicle_count
+
+        message = DiscordBible::Utils.citation(context.bible, book.name, chapter_index + 1, versicle_start, versicle_end)
+        event.respond(content: message)
+      end
+    end
+
+    class CitationCommand < DiscordBible::Command
+      attr_reader :name, :description
+
+      def initialize
+        super
+        @name = :citation
+        @description = 'Get a specific citation from the Bible'
+      end
+
+      def setup(cmd, _context)
+        cmd.string('book', 'The book to get the citation from', required: true)
+        cmd.integer('chapter', 'The chapter from the book', required: true)
+        cmd.integer('versicle_start', 'The first versicle of the citation', required: true)
+        cmd.integer('versicle_end', 'The last versicle of the citation', required: false)
+      end
+
+      def execute(event, context)
+        book = event.options['book']
+        chapter = event.options['chapter']
+        versicle_start = event.options['versicle_start']
+        versicle_end = event.options['versicle_end']
+        event.respond(content: DiscordBible::Utils.citation(context.bible, book, chapter, versicle_start, versicle_end))
+      end
+    end
+
     def self.all_commands
-      [BooksCommand.new]
+      [BooksCommand.new, RandomCitationCommand.new, CitationCommand.new]
     end
   end
 end
