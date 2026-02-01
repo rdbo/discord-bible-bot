@@ -1,9 +1,12 @@
 #!/usr/bin/ruby
- require 'biblegen'
- require 'discordrb'
+require_relative '../lib/discord_bible'
 
 token = ENV["DISCORD_API_TOKEN"] || raise("Missing 'DISCORD_API_TOKEN' environment variable!")
-$bible = BibleGen::Bible.from_hash(JSON.load_file("assets/bible.json", symbolize_names: true))
+bot = DiscordBible::Bot.new(token, 'assets/bible.json')
+bot.run
+
+# old code
+=begin
 bot = Discordrb::Bot.new(token: token, intents: [:server_messages])
 channels = { "1234": "876530451039256647" }
 last_daily_update = nil
@@ -136,3 +139,4 @@ _daily_message_thread = Thread.new do
 end
 
 bot.run
+=end
