@@ -2,4 +2,5 @@ Dockerfile
 .dockerignore
 .env
 .gem/
+.git/
 cache/
