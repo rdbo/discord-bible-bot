@@ -1,11 +1,11 @@
 module DiscordBible
   class Bot
-    def initialize(token, bible_json_path, config_path, commands=DiscordBible::Commands.all_commands, periodic_tasks=DiscordBible::Tasks.all_tasks, time_check_interval_secs: 3600)
+    def initialize(token, bible_json_path, cache_path, commands=DiscordBible::Commands.all_commands, periodic_tasks=DiscordBible::Tasks.all_tasks, time_check_interval_secs: 3600)
       @time_check_interval_secs = time_check_interval_secs
       puts "Loading Bible..."
       @bible = BibleGen::Bible.from_hash(JSON.load_file(bible_json_path, symbolize_names: true))
-      puts "Loading config..."
-      @config = Config.new(config_path)
+      puts "Loading cache..."
+      @cache = Cache.new(cache_path)
 
       # Set up bot
       @bot = Discordrb::Bot.new(token: token, intents: [:server_messages])
@@ -30,11 +30,11 @@ module DiscordBible
         end
         blocks
       end
-      @context = Context.new(@bot, @bible, @config, @ordered_chapters)
+      @context = Context.new(@bot, @bible, @cache, @ordered_chapters)
 
       # Register commands
       commands.each { |command|
-        # if not @config.is_initialized
+        # if not @cache.is_initialized
         puts "Registering command '/#{command.name}'..."
         @bot.register_application_command(command.name, command.description) do |cmd|
           command.setup(cmd, @context)
@@ -56,7 +56,7 @@ module DiscordBible
           periodic_tasks.each { |periodic_task|
             begin
               now = Time.now
-              last_time_check = @config.last_time_check
+              last_time_check = @cache.last_time_check
               if last_time_check and (now - last_time_check) < periodic_task.interval_secs
                 next
               end
@@ -68,7 +68,7 @@ module DiscordBible
             end
           }
           puts "Finished periodic task check"
-          @config.set_last_time_check(Time.now)
+          @cache.set_last_time_check(Time.now)
           sleep @time_check_interval_secs
         end
       end
@@ -83,7 +83,7 @@ module DiscordBible
 
     def stop
       puts "Discord Bible Bot stopped"
-      @config.save
+      @cache.save
       @periodic_task_thread.exit
       @bot.stop
     end

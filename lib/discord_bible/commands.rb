@@ -87,7 +87,7 @@ module DiscordBible
       def execute(event, context)
         server_id = event.server_id
         channel = event.options['channel']
-        context.config.set_daily_message_channels_entry(server_id, channel)
+        context.cache.set_daily_message_channels_entry(server_id, channel)
         if channel
           event.respond(content: "Daily message channel updated successfully for server <#{server_id}>: channel <#{channel}>", ephemeral: true)
         else

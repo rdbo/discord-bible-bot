@@ -8,9 +8,9 @@ module DiscordBible
       end
 
       def execute(context)
-        channels = context.config.daily_message_channels.values
+        channels = context.cache.daily_message_channels.values
         ordered_chapters = context.ordered_chapters
-        daily_chapter_index = context.config.chapter_counter
+        daily_chapter_index = context.cache.chapter_counter
 
         for channel in channels
           puts "CHANNEL: #{channel}"
@@ -23,7 +23,7 @@ module DiscordBible
           sleep 10
         end
 
-        context.config.set_chapter_counter(daily_chapter_index + 1)
+        context.cache.set_chapter_counter(daily_chapter_index + 1)
       end
     end
 

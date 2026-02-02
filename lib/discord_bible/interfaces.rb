@@ -1,11 +1,11 @@
 module DiscordBible
   class Context
-    attr_reader :bot, :bible, :config, :ordered_chapters
+    attr_reader :bot, :bible, :cache, :ordered_chapters
 
-    def initialize(bot, bible, config, ordered_chapters)
+    def initialize(bot, bible, cache, ordered_chapters)
       @bot = bot
       @bible = bible
-      @config = config
+      @cache = cache
       @ordered_chapters = ordered_chapters
     end
   end

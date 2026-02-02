@@ -1,7 +1,7 @@
 require 'time'
 
 module DiscordBible
-  class Config
+  class Cache
     attr_reader :is_initialized, :last_time_check, :daily_message_channels, :chapter_counter
 
     def initialize(file_path)
@@ -10,7 +10,7 @@ module DiscordBible
         content = JSON.load_file(file_path)
         @chapter_counter = content["chapter_counter"] || 0
         @last_time_check = content["last_time_check"].then{|s| Time.parse(s)} || nil
-        @daily_message_channels = content["daily_message_channels"] || raise("Bad configuration file!")
+        @daily_message_channels = content["daily_message_channels"] || raise("Bad cache file!")
         @is_initialized = true
       else
         @is_initialized = false
