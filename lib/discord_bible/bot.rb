@@ -34,12 +34,12 @@ module DiscordBible
 
       # Register commands
       commands.each { |command|
-        if not @config.is_initialized
-          puts "Registering command '/#{command.name}'..."
-          @bot.register_application_command(command.name, command.description) do |cmd|
-            command.setup(cmd, @context)
-          end
+        # if not @config.is_initialized
+        puts "Registering command '/#{command.name}'..."
+        @bot.register_application_command(command.name, command.description) do |cmd|
+          command.setup(cmd, @context)
         end
+        # end
 
         @bot.application_command(command.name) do |event|
           command.execute(event, @context)
