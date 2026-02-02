@@ -14,4 +14,6 @@ RUN mkdir -p "$GEM_HOME"
 RUN rm Gemfile.lock
 RUN gem install bundler
 RUN bundle install
-CMD "./discord-bible-bot"
+
+USER root
+CMD ["sh", "-c", "chown -R runner:root /app/cache && su runner - ./discord-bible-bot"]
