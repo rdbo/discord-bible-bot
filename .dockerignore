@@ -4,3 +4,4 @@ Dockerfile
 .gem/
 .git/
 cache/
+docker-run.sh
