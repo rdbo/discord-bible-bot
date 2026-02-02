@@ -71,8 +71,33 @@ module DiscordBible
       end
     end
 
+    class SetDailyMessageChannelCommand < DiscordBible::Command
+      attr_reader :name, :description
+
+      def initialize
+        super
+        @name = :daily_message_channel
+        @description = 'Set/unset the daily message channel'
+      end
+
+      def setup(cmd, _context)
+        cmd.channel('channel', 'The channel that will receeive daily updates from this bot', required: false)
+      end
+
+      def execute(event, context)
+        server_id = event.server_id
+        channel = event.options['channel']
+        context.config.set_daily_message_channels_entry(server_id, channel)
+        if channel
+          event.respond(content: "Daily message channel updated successfully for server <#{server_id}>: channel <#{channel}>", ephemeral: true)
+        else
+          event.respond(content: "Unset daily message channel for server <#{server_id}>", ephemeral: true)
+        end
+      end
+    end
+
     def self.all_commands
-      [BooksCommand.new, RandomCitationCommand.new, CitationCommand.new]
+      [BooksCommand.new, RandomCitationCommand.new, CitationCommand.new, SetDailyMessageChannelCommand.new]
     end
   end
 end

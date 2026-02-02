@@ -1,10 +1,12 @@
 module DiscordBible
   class Context
-    attr_reader :bot, :bible
+    attr_reader :bot, :bible, :config, :ordered_chapters
 
-    def initialize(bot, bible)
+    def initialize(bot, bible, config, ordered_chapters)
       @bot = bot
       @bible = bible
+      @config = config
+      @ordered_chapters = ordered_chapters
     end
   end
 
@@ -27,6 +29,10 @@ module DiscordBible
   end
 
   class PeriodicTask
+    def name
+      raise NotImplementedError, "#{self.class} must implement #name"
+    end
+
     def execute(context)
       raise NotImplementedError, "#{self.class} must implement #execute"
     end
