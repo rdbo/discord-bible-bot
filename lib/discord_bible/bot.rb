@@ -64,6 +64,7 @@ module DiscordBible
               end
 
               puts "Executing task: #{task.name}"
+              periodic_task[:last_run] = now
               task.execute(@context)
             rescue => e
               puts "[ERROR] Time event check failed for task '#{task.name}': #{e}"
