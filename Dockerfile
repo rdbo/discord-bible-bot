@@ -5,7 +5,7 @@ RUN apk add ruby ruby-doc ruby-rdoc ruby-full ruby-dev ruby-bundler git
 WORKDIR /app
 COPY . .
 
-RUN adduser -S runner
+RUN adduser --uid 1000 -S runner
 RUN chown -R runner:root /app
 USER runner
 
