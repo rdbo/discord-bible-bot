@@ -2,20 +2,20 @@ require 'time'
 
 module DiscordBible
   class Cache
-    attr_reader :is_initialized, :last_time_check, :daily_message_channels, :chapter_counter
+    attr_reader :is_initialized, :last_runs, :daily_message_channels, :chapter_counter
 
     def initialize(file_path)
       @file_path = file_path
       if File.exist?(file_path)
         content = JSON.load_file(file_path)
         @chapter_counter = content["chapter_counter"] || 0
-        @last_time_check = content["last_time_check"].then{|s| Time.parse(s)} || nil
+        @last_runs = content["last_runs"]&.map{|k, v| [k, Time.parse(v)]}.to_h || nil
         @daily_message_channels = content["daily_message_channels"] || raise("Bad cache file!")
         @is_initialized = true
       else
         @is_initialized = false
         @chapter_counter = 0
-        @last_time_check = nil
+        @last_runs = {}
         @daily_message_channels = {}
       end
     end
@@ -23,13 +23,13 @@ module DiscordBible
     def to_hash
       {
         chapter_counter: @chapter_counter,
-        last_time_check: @last_time_check,
+        last_runs: @last_runs,
         daily_message_channels: @daily_message_channels
       }
     end
 
-    def set_last_time_check(time_check)
-      @last_time_check = time_check
+    def set_last_run(task_name, time)
+      @last_runs[task_name] = time
       self.save
     end
 

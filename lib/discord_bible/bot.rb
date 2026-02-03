@@ -51,27 +51,24 @@ module DiscordBible
 
       # Periodic tasks
       puts "Setting up perioding tasks thread..."
-      periodic_tasks = periodic_tasks.map{|x| {task: x, last_run: @cache.last_time_check}}
       @periodic_task_thread = Thread.new do
         loop do
           periodic_tasks.each { |periodic_task|
-            task = periodic_task[:task]
             begin
               now = Time.now
-              last_time_check = periodic_task[:last_run]
-              if last_time_check and (now - last_time_check) < task.interval_secs
+              last_run = @cache.last_runs[periodic_task.name]
+              if last_run and (now - last_run) < periodic_task.interval_secs
                 next
               end
 
-              puts "Executing task: #{task.name}"
-              periodic_task[:last_run] = now
-              task.execute(@context)
+              puts "Executing task: #{periodic_task.name}"
+              @cache.set_last_run(periodic_task.name, now)
+              periodic_task.execute(@context)
             rescue => e
-              puts "[ERROR] Time event check failed for task '#{task.name}': #{e}"
+              puts "[ERROR] Time event check failed for task '#{periodic_task.name}': #{e}"
             end
           }
           puts "Finished periodic task check"
-          @cache.set_last_time_check(Time.now)
           sleep @time_check_interval_secs
         end
       end

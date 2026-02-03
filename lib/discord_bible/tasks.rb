@@ -13,7 +13,6 @@ module DiscordBible
         daily_chapter_index = context.cache.chapter_counter
 
         for channel in channels
-          puts "CHANNEL: #{channel}"
           continue unless channel
           puts "[DailyBibleChapterTask] Sending daily chapter to channel: #{channel}"
           for block in ordered_chapters[daily_chapter_index]
