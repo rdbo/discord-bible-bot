@@ -1,8 +1,8 @@
 GIT
   remote: https://github.com/rdbo/biblegen
-  revision: 49ed075d8ef903f90277d80f38e9734d242ec0b3
+  revision: c3382955667f8cbb66354a0c6905ec265331dcca
   specs:
-    biblegen (1.3.1)
+    biblegen (1.4.0)
 
 GEM
   remote: https://rubygems.org/
@@ -73,7 +73,7 @@ DEPENDENCIES
 
 CHECKSUMS
   base64 (0.3.0) sha256=27337aeabad6ffae05c265c450490628ef3ebd4b67be58257393227588f5a97b
-  biblegen (1.3.1)
+  biblegen (1.4.0)
   discordrb (3.7.2) sha256=a9a32f485e639a1e63313479b40a7b49100b1b50eb74ed17b8bd413e01a3b46f
   discordrb-webhooks (3.7.2) sha256=154d8c3a31aaeb6d580456b9624e0486c28812dcc19b51d91c43a6c5600112ea
   domain_name (0.6.20240107) sha256=5f693b2215708476517479bf2b3802e49068ad82167bcd2286f899536a17d933
